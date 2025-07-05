@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pengeluaran - KopiKurrr</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --cream: #fffdf0;
+      --coffee: #5c3b1e;
+      --accent: #f8f1d6;
+      --dark: #422e1f;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      background-color: var(--cream);
+    }
+
+    aside {
+      width: 220px;
+      background: #fff;
+      padding: 2rem 1rem;
+      border-right: 2px solid #eee;
+      height: 100vh;
+      position: relative;
+    }
+
+    aside h1 {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--coffee);
+      font-size: 1.2rem;
+    }
+
+    aside h1 i {
+      font-size: 1.4rem;
+    }
+
+    nav a {
+      display: block;
+      margin-top: 1rem;
+      color: var(--coffee);
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      font-weight: bold;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    h2 {
+      color: var(--coffee);
+      margin-bottom: 0.5rem;
+    }
+
+    .container {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .form-section, .table-section {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex: 1;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: var(--coffee);
+    }
+
+    button {
+      margin-top: 1.5rem;
+      background: var(--coffee);
+      color: #fff;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      color: var(--coffee);
+    }
+
+    td:last-child i {
+      cursor: pointer;
+      margin: 0 6px;
+    }
+
+    .logout-btn {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background-color: #b91c1c;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <aside>
+    <h1><i class="ph ph-coffee"></i> KopiKurrr</h1>
+    <nav>
+      <a href="admin-dashboard.html">Keuntungan</a>
+      <a href="pembelian.html">Pembelian</a>
+      <a href="pengeluaran.html">Pengeluaran</a>
+      <a href="produk.html">Produk</a>
+    </nav>
+    <button class="logout-btn" onclick="logout()">
+      🔓 Log Out
+    </button>
+  </aside>
+
+  <main>
+    <h2>Manajemen Pengeluaran</h2>
+    <p>Lacak semua pengeluaran modal dan operasional bisnis.</p>
+    <div class="container">
+      <div class="form-section">
+        <h3>Tambahkan Pengeluaran</h3>
+        <label for="nama">Nama Item</label>
+        <input id="nama" type="text" placeholder="Contoh: Biji Kopi">
+
+        <label for="biaya">Biaya (IDR)</label>
+        <input id="biaya" type="number" placeholder="Contoh: 500000">
+
+        <button onclick="tambahPengeluaran()"><i class="ph ph-plus-circle"></i> Tambahkan</button>
+      </div>
+
+      <div class="table-section">
+        <h3>Riwayat Pengeluaran</h3>
+        <table id="tabelPengeluaran">
+          <thead>
+            <tr><th>Barang</th><th>Biaya</th><th>Tanggal</th><th>Aksi</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let pengeluaran = JSON.parse(localStorage.getItem("pengeluaran")) || [];
+
+    function formatRupiah(angka) {
+      return "Rp " + parseInt(angka).toLocaleString("id-ID");
+    }
+
+    function simpan() {
+      localStorage.setItem("pengeluaran", JSON.stringify(pengeluaran));
+    }
+
+    function renderPengeluaran() {
+      const tbody = document.querySelector("#tabelPengeluaran tbody");
+      tbody.innerHTML = "";
+      pengeluaran.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td contenteditable="true" onblur="editItem(${index}, 'nama', this.innerText)">${item.nama}</td>
+          <td contenteditable="true" onblur="editItem(${index}, 'biaya', this.innerText.replace(/\\D/g, ''))">${formatRupiah(item.biaya)}</td>
+          <td>${item.tanggal}</td>
+          <td><i class="ph ph-trash" onclick="hapus(${index})"></i></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function tambahPengeluaran() {
+      const nama = document.getElementById("nama").value.trim();
+      const biaya = parseInt(document.getElementById("biaya").value.trim());
+      if (!nama || isNaN(biaya)) return alert("Isi semua data dengan benar.");
+
+      const tgl = new Date().toLocaleDateString("id-ID");
+      pengeluaran.push({ nama, biaya, tanggal: tgl });
+      simpan();
+      renderPengeluaran();
+
+      document.getElementById("nama").value = "";
+      document.getElementById("biaya").value = "";
+    }
+
+    function editItem(index, key, value) {
+      if (key === "biaya") {
+        pengeluaran[index][key] = parseInt(value);
+      } else {
+        pengeluaran[index][key] = value.trim();
+      }
+      simpan();
+      renderPengeluaran();
+    }
+
+    function hapus(index) {
+      if (confirm("Yakin ingin menghapus item ini?")) {
+        pengeluaran.splice(index, 1);
+        simpan();
+        renderPengeluaran();
+      }
+    }
+
+    function logout() {
+      window.location.href = "index.html";
+    }
+
+    renderPengeluaran();
+  </script>
+
+</body>
+</html>

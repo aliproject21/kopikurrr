@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KopiKurrr</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --cream: #fffdf6; --coffee: #5c3b1e; --accent: #f1e0c5; }
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { margin: 0; padding: 2rem; background: var(--cream); color: var(--coffee); }
+    h1, h2 { color: var(--coffee); }
+    .main-container { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: 2rem; }
+    .section { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 16px rgba(92, 59, 30, 0.1); }
+    label { font-weight: 600; display: block; margin-top: 1rem; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 0.3rem; }
+    button { background: var(--coffee); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease; }
+    button:hover { background: #4a2f15; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 12px 8px; border-bottom: 1px solid #eee; text-align: left; }
+    .keranjang-list { list-style: none; padding: 0; }
+    .keranjang-list li { padding: 8px 0; border-bottom: 1px dashed #ccc; }
+    .keranjang-list button { margin-left: 8px; font-size: 0.8rem; padding: 3px 8px; border-radius: 6px; background: #e2cbb0; color: #3b2f2f; border: none; cursor: pointer; }
+    .keranjang-list button:hover { background: #d3b28f; }
+    #statusCheckout { margin-top: 1rem; padding: 1rem; background-color: var(--accent); border-radius: 8px; color: var(--coffee); }
+    .menu-section { margin-top: 2rem; }
+    @media (max-width: 600px) { body { padding: 1rem; } }
+  </style>
+</head>
+<body>
+
+  <h1>☕ KopiKurrr</h1>
+
+  <div class="main-container">
+    <div class="section">
+      <h2>📝 Informasi Pemesan</h2>
+      <label>Nama</label>
+      <input type="text" id="nama" placeholder="Nama lengkap...">
+      <label>Alamat</label>
+      <textarea id="alamat" rows="4" placeholder="Alamat lengkap pengiriman..."></textarea>
+    </div>
+
+    <div class="section">
+      <h2>🛒 Keranjang</h2>
+      <ul id="keranjang" class="keranjang-list"></ul>
+      <p id="total">Total: Rp 0</p>
+      <button onclick="checkout()">Checkout</button>
+      <div id="statusCheckout"></div>
+    </div>
+  </div>
+
+  <div class="menu-section section">
+    <h2>📋 Menu Satuan</h2>
+    <table>
+      <thead>
+        <tr><th>Nama</th><th>Deskripsi</th><th>Harga</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Kopi Hitam</td><td>Strong dan aromatik</td><td>Rp 10.000</td><td><button onclick="tambahItem('Kopi Hitam', 10000)">Tambah</button></td></tr>
+        <tr><td>Kupresso</td><td>Espresso shot full body</td><td>Rp 10.000</td><td><button onclick="tambahItem('Kupresso', 10000)">Tambah</button></td></tr>
+        <tr><td>Kurma Latte Bliss</td><td>Latte manis alami</td><td>Rp 10.000</td><td><button onclick="tambahItem('Kurma Latte Bliss', 10000)">Tambah</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="menu-section section">
+    <h2>🎁 Paket Spesial</h2>
+    <table>
+      <tbody>
+        <tr><td><strong>Paket Besti</strong><br>1 Kopi Hitam, 2 Kupresso, 2 Kurma Latte Bliss</td><td>Rp 50.000</td><td><button onclick="tambahItem('Paket Besti', 50000)">Tambah</button></td></tr>
+        <tr><td><strong>Paket Circle</strong><br>3 Kopi Hitam, 3 Kupresso, 4 Kurma Latte Bliss</td><td>Rp 100.000</td><td><button onclick="tambahItem('Paket Circle', 100000)">Tambah</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+<script>
+const keranjang = [];
+
+function tambahItem(nama, harga) {
+  const item = keranjang.find(i => i.nama === nama);
+  if (item) item.jumlah++;
+  else keranjang.push({ nama, harga, jumlah: 1 });
+  renderKeranjang();
+}
+
+function renderKeranjang() {
+  const list = document.getElementById('keranjang');
+  const total = document.getElementById('total');
+  list.innerHTML = '';
+  let totalHarga = 0;
+
+  keranjang.forEach((item, index) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      ${item.nama} x${item.jumlah} - Rp ${(item.harga * item.jumlah).toLocaleString('id-ID')}
+      <button onclick="kurangiItem(${index})">-</button>
+      <button onclick="hapusItem(${index})">Hapus</button>
+    `;
+    list.appendChild(li);
+    totalHarga += item.harga * item.jumlah;
+  });
+
+  total.textContent = `Total: Rp ${totalHarga.toLocaleString('id-ID')}`;
+}
+
+function kurangiItem(index) {
+  if (keranjang[index].jumlah > 1) keranjang[index].jumlah--;
+  else keranjang.splice(index, 1);
+  renderKeranjang();
+}
+
+function hapusItem(index) {
+  keranjang.splice(index, 1);
+  renderKeranjang();
+}
+
+function checkout() {
+  const nama = document.getElementById('nama').value.trim();
+  const alamat = document.getElementById('alamat').value.trim();
+  const status = document.getElementById('statusCheckout');
+  if (!nama || !alamat || keranjang.length === 0) {
+    status.innerHTML = "❌ Mohon lengkapi data dan isi keranjang dulu ya.";
+    return;
+  }
+
+  const totalHarga = keranjang.reduce((t, i) => t + i.harga * i.jumlah, 0);
+  const waktu = new Date().toISOString();
+
+  const riwayat = JSON.parse(localStorage.getItem('riwayatTransaksi')) || [];
+  riwayat.push({ nama, alamat, items: [...keranjang], total: totalHarga, waktu });
+  localStorage.setItem('riwayatTransaksi', JSON.stringify(riwayat));
+
+  const pembelian = JSON.parse(localStorage.getItem('riwayatPembelian')) || [];
+  pembelian.push({
+    id: 'KURR' + (Date.now().toString().slice(-5)),
+    nama, alamat,
+    barang: keranjang.map(i => `${i.nama} x${i.jumlah}`).join(', '),
+    total: totalHarga,
+    tanggal: new Date().toLocaleDateString('id-ID')
+  });
+  localStorage.setItem('riwayatPembelian', JSON.stringify(pembelian));
+
+  status.innerHTML = `✅ <strong>Terima kasih, ${nama}!</strong><br>Pesananmu senilai <strong>Rp ${totalHarga.toLocaleString('id-ID')}</strong> sedang kami proses. 🚚☕`;
+  keranjang.length = 0;
+  renderKeranjang();
+}
+</script>
+
+</body>
+</html>

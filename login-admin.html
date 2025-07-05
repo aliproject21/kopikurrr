@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kopi Kurrr - Login Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#fef9e6] min-h-screen flex flex-col justify-center items-center">
+
+  <!-- Card Login -->
+  <div class="bg-[#fffbe9] p-8 rounded-xl shadow-md max-w-md w-full border border-yellow-300">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-[#4b2e1e]">☕ Kopi Kurrr</h1>
+      <p class="font-semibold text-[#4b2e1e] mt-1">Masuk Admin / Pemilik</p>
+      <p class="text-sm text-gray-600">Gunakan kredensial Anda untuk mengakses dasbor.</p>
+    </div>
+
+    <!-- Form -->
+    <form onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700">Nama belakang</label>
+        <input type="text" id="username" required class="mt-1 block w-full p-2 rounded-md border border-gray-300" placeholder="kopikurrr">
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Kata sandi</label>
+        <input type="password" id="password" required class="mt-1 block w-full p-2 rounded-md border border-gray-300" placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="w-full bg-[#4b2e1e] text-white py-2 rounded-md hover:bg-[#3b2416] transition">
+        Masuk
+      </button>
+    </form>
+
+    <!-- Pesan Error -->
+    <p id="error" class="text-red-600 text-sm mt-4 hidden text-center">❌ Username atau password salah!</p>
+  </div>
+
+  <!-- Script Login -->
+  <script>
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const username = document.getElementById("username").value.trim().toLowerCase();
+      const password = document.getElementById("password").value.trim();
+
+      if (username === "kopikurrr" && password === "trenhidupsehat") {
+        window.location.href = "admin-dashboard.html";
+      } else {
+        document.getElementById("error").classList.remove("hidden");
+      }
+    }
+  </script>
+
+</body>
+</html>

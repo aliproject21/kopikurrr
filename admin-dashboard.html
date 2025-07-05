@@ -1,0 +1,152 @@
+<!-- 📊 admin-dashboard.html FINAL Terintegrasi -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin - KopiKurrr</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-[#fffde6] text-[#44260e] font-sans">
+  <aside class="w-64 h-screen bg-[#fff3c7] p-6 shadow-md fixed">
+    <h2 class="text-2xl font-bold mb-8">☕ KopiKurrr</h2>
+    <nav class="space-y-4">
+      <a href="admin-dashboard.html" class="block font-bold">📊 Keuntungan</a>
+      <a href="pembelian.html" class="block">🛒 Pembelian</a>
+      <a href="pengeluaran.html" class="block">💸 Pengeluaran</a>
+      <a href="produk.html" class="block">📦 Produk</a>
+    </nav>
+    <div class="absolute bottom-6 left-6">
+      <a href="login.html" class="text-sm text-red-600 hover:underline">🔓 Log Out</a>
+    </div>
+  </aside>
+
+  <main class="ml-72 p-6">
+    <h1 class="text-3xl font-bold mb-6">Dashboard Keuntungan</h1>
+
+    <div class="mb-4">
+      <label class="mr-2 font-semibold">Filter Grafik:</label>
+      <select id="filterGrafik" class="p-2 border rounded">
+        <option value="harian">Harian</option>
+        <option value="mingguan">Mingguan</option>
+        <option value="tahunan">Tahunan</option>
+      </select>
+    </div>
+
+    <div class="bg-[#fff8dc] p-6 rounded-lg shadow mb-8">
+      <h2 class="text-xl font-bold mb-4">📈 Grafik Keuntungan</h2>
+      <canvas id="chartKeuntungan" height="100"></canvas>
+    </div>
+
+    <div class="bg-[#fff8dc] p-6 rounded-lg shadow mb-8">
+      <h2 class="text-xl font-bold mb-4">🥇 Top 3 Kopi Terlaris</h2>
+      <canvas id="chartTerlaris" height="100"></canvas>
+    </div>
+
+    <div class="bg-[#fff8dc] p-6 rounded-lg shadow mb-8">
+      <h2 class="text-xl font-bold mb-4">📊 Rangkuman Laba Bersih</h2>
+      <p id="summaryProfit" class="text-lg font-semibold"></p>
+    </div>
+
+    <div class="bg-[#fff8dc] p-6 rounded-lg shadow mb-20">
+      <h2 class="text-xl font-bold mb-4">🧾 Riwayat Transaksi Pelanggan</h2>
+      <ul id="riwayatTransaksi" class="space-y-2 text-sm"></ul>
+    </div>
+  </main>
+
+  <script>
+    const ctx = document.getElementById('chartKeuntungan').getContext('2d');
+    const ctxPie = document.getElementById('chartTerlaris').getContext('2d');
+    const selectFilter = document.getElementById('filterGrafik');
+    const riwayat = JSON.parse(localStorage.getItem('riwayatTransaksi')) || [];
+    const pengeluaran = JSON.parse(localStorage.getItem('pengeluaran')) || [];
+
+    function groupData(mode) {
+      const grouped = {};
+      for (const tx of riwayat) {
+        const d = new Date(tx.waktu);
+        let key = '';
+        if (mode === 'harian') key = d.toISOString().split('T')[0];
+        else if (mode === 'mingguan') key = `${d.getFullYear()}-W${Math.floor(d.getDate() / 7) + 1}`;
+        else if (mode === 'tahunan') key = `${d.getFullYear()}`;
+        grouped[key] = (grouped[key] || 0) + tx.total;
+      }
+      return grouped;
+    }
+
+    let chartLine;
+    function renderChart() {
+      const mode = selectFilter.value;
+      const grouped = groupData(mode);
+      const labels = Object.keys(grouped);
+      const data = Object.values(grouped);
+
+      if (chartLine) chartLine.destroy();
+
+      chartLine = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: `Keuntungan (${mode})`,
+            data,
+            borderColor: '#6b4c2c',
+            backgroundColor: '#ffe8b0',
+            tension: 0.3
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    let chartPie;
+    function renderPie() {
+      const productCount = {};
+      riwayat.forEach(tx => {
+        tx.items.forEach(item => {
+          productCount[item.nama] = (productCount[item.nama] || 0) + item.jumlah;
+        });
+      });
+      const sorted = Object.entries(productCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
+      const labels = sorted.map(i=>i[0]);
+      const data = sorted.map(i=>i[1]);
+
+      if (chartPie) chartPie.destroy();
+
+      chartPie = new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Terlaris',
+            data,
+            backgroundColor: ['#d1a684', '#ffd9a0', '#c3986c']
+          }]
+        }
+      });
+    }
+
+    function renderSummary() {
+      const totalProfit = riwayat.reduce((sum, tx) => sum + tx.total, 0);
+      const totalOut = pengeluaran.reduce((sum, e) => sum + e.jumlah, 0);
+      const net = totalProfit - totalOut;
+      document.getElementById('summaryProfit').innerHTML = `
+        Total Profit: <strong>Rp ${totalProfit.toLocaleString('id-ID')}</strong><br>
+        Total Pengeluaran: <strong>Rp ${totalOut.toLocaleString('id-ID')}</strong><br>
+        <span class="text-green-700">Laba Bersih: <strong>Rp ${net.toLocaleString('id-ID')}</strong></span>
+      `;
+    }
+
+    const list = document.getElementById('riwayatTransaksi');
+    list.innerHTML = riwayat.map(tx => `
+      <li>📅 ${new Date(tx.waktu).toLocaleDateString('id-ID')} - <strong>${tx.nama}</strong> - Rp ${tx.total.toLocaleString('id-ID')}</li>
+    `).join('');
+
+    selectFilter.onchange = () => renderChart();
+    renderChart();
+    renderPie();
+    renderSummary();
+  </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Produk - KopiKurrr</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --cream: #fffdf0;
+      --coffee: #5c3b1e;
+      --accent: #f8f1d6;
+      --dark: #422e1f;
+    }
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { margin: 0; display: flex; background-color: var(--cream); }
+    aside {
+      width: 220px;
+      background: #fff;
+      padding: 2rem 1rem;
+      border-right: 2px solid #eee;
+      height: 100vh;
+      position: relative;
+    }
+    aside h1 { display: flex; align-items: center; gap: 0.6rem; color: var(--coffee); font-size: 1.2rem; }
+    aside h1 i { font-size: 1.4rem; }
+    nav a { display: block; margin-top: 1rem; color: var(--coffee); text-decoration: none; }
+    main { flex: 1; padding: 2rem; }
+    h2 { color: var(--coffee); margin-bottom: 0.5rem; }
+    .table-section {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-top: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      color: var(--coffee);
+    }
+    .aksi i {
+      cursor: pointer;
+      margin: 0 6px;
+      font-size: 18px;
+    }
+    .tambah-btn {
+      background: var(--coffee);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
+    .logout-btn {
+      background-color: #b91c1c;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <h1><i class="ph ph-coffee"></i> Kopi Kurrr</h1>
+    <nav>
+      <a href="admin-dashboard.html">Keuntungan</a>
+      <a href="pembelian.html">Pembelian</a>
+      <a href="pengeluaran.html">Pengeluaran</a>
+      <a href="produk.html">Produk</a>
+    </nav>
+
+    <button class="logout-btn" onclick="logout()">🔓 Log Out</button>
+  </aside>
+
+  <main>
+    <h2>Manajemen Produk</h2>
+    <p>Tambah, ubah, atau hapus menu kopi Anda.</p>
+    <a href="#" class="tambah-btn" id="tambahBtn"><i class="ph ph-plus-circle"></i> Tambahkan Produk</a>
+
+    <div class="table-section">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama Produk</th>
+            <th>Deskripsi</th>
+            <th>Harga</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="produkBody">
+          <tr>
+            <td><b>Kopi Hitam</b></td>
+            <td>Kopi hitam klasik dengan cita rasa yang kuat dan aromatik.</td>
+            <td>Rp 10.000</td>
+            <td class="aksi">
+              <i class="ph ph-pencil" onclick="editProduk(this)"></i>
+              <i class="ph ph-trash" onclick="hapusProduk(this)"></i>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Kupresso</b></td>
+            <td>Espresso shot yang intens, pilihan sempurna untuk penambah energi.</td>
+            <td>Rp 10.000</td>
+            <td class="aksi">
+              <i class="ph ph-pencil" onclick="editProduk(this)"></i>
+              <i class="ph ph-trash" onclick="hapusProduk(this)"></i>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Kurma Latte Bliss</b></td>
+            <td>Perpaduan lembut latte dengan manis alami buah kurma.</td>
+            <td>Rp 10.000</td>
+            <td class="aksi">
+              <i class="ph ph-pencil" onclick="editProduk(this)"></i>
+              <i class="ph ph-trash" onclick="hapusProduk(this)"></i>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const produkBody = document.getElementById("produkBody");
+
+    document.getElementById("tambahBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      const nama = prompt("Nama Produk:");
+      const deskripsi = prompt("Deskripsi:");
+      const harga = prompt("Harga (angka saja):");
+
+      if (nama && deskripsi && harga) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><b>${nama}</b></td>
+          <td>${deskripsi}</td>
+          <td>Rp ${parseInt(harga).toLocaleString("id-ID")}</td>
+          <td class="aksi">
+            <i class="ph ph-pencil" onclick="editProduk(this)"></i>
+            <i class="ph ph-trash" onclick="hapusProduk(this)"></i>
+          </td>
+        `;
+        produkBody.appendChild(row);
+      }
+    });
+
+    function editProduk(icon) {
+      const row = icon.closest("tr");
+      const nama = prompt("Edit Nama Produk:", row.cells[0].innerText);
+      const deskripsi = prompt("Edit Deskripsi:", row.cells[1].innerText);
+      const harga = prompt("Edit Harga:", row.cells[2].innerText.replace(/\D/g, ""));
+
+      if (nama && deskripsi && harga) {
+        row.cells[0].innerHTML = `<b>${nama}</b>`;
+        row.cells[1].innerText = deskripsi;
+        row.cells[2].innerText = `Rp ${parseInt(harga).toLocaleString("id-ID")}`;
+      }
+    }
+
+    function hapusProduk(icon) {
+      if (confirm("Yakin mau hapus produk ini?")) {
+        icon.closest("tr").remove();
+      }
+    }
+
+    function logout() {
+      alert("Logout berhasil.");
+      window.location.href = "index.html"; // arahkan ke halaman login
+    }
+  </script>
+</body>
+</html>
